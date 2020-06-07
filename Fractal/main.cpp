@@ -1,7 +1,6 @@
 #include <iostream>
 #include <stdint.h>
 #include <algorithm>
-#include <opencv2/opencv.hpp>
 
 #include "bmp.h"
 #include "RgbLut.h"
@@ -86,7 +85,7 @@ int main(int argc, char ** argv)
 	const double WIDTH_2_PLANE = (PLANE_X_END - PLANE_X_START) / (IMAGE_WIDTH - 1);
 	const double HEIGHT_2_PLANE = (PLANE_Y_END - PLANE_Y_START) / (IMAGE_HEIGHT - 1);
 
-	cv::Mat outputImage(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC3);
+	uint8_t* outputImage = new uint8_t[3 * IMAGE_HEIGHT * IMAGE_WIDTH];
 
 	// color LUT generation
 	RgbLut lut;
@@ -95,29 +94,17 @@ int main(int argc, char ** argv)
 
 		std::vector<ColorStop> stops;
 		stops.push_back({ 0.0, 1, 1, 1 });
-		stops.push_back({ 0.5, 128, 0, 128 });
+		stops.push_back({ 0.4, 128, 0, 128 });
 		stops.push_back({ 1.0, 0, 0, 255 });
 
 		createLut(stops, lut);
 	}
 
-	for (int y = 0; y < IMAGE_HEIGHT; y++)
-	{
-		uint8_t* outLine = outputImage.ptr<uint8_t>(y);
-		for (int x = 0; x < IMAGE_WIDTH; x++)
-		{
-			const double cx = x * WIDTH_2_PLANE + PLANE_X_START;
-			const double cy = y * HEIGHT_2_PLANE + PLANE_Y_START;
-			
-			uint8_t val = pixelValue(cx, cy);
-			outLine[3 * x] = lut.r[val];
-			outLine[3 * x + 1] = lut.g[val];
-			outLine[3 * x + 2] = lut.b[val];
-		}
-	}
+	generateImage(outputImage,
+		IMAGE_WIDTH, IMAGE_HEIGHT, 3 * IMAGE_WIDTH,
+		PLANE_X_START, PLANE_Y_START, WIDTH_2_PLANE, HEIGHT_2_PLANE,
+		lut);
 
-	cv::imwrite("fractal.bmp", outputImage);
-
-	saveBmpRgb("fractal2.bmp", outputImage.data, IMAGE_WIDTH, IMAGE_HEIGHT);
+	saveBmpRgb("fractal2.bmp", outputImage, IMAGE_WIDTH, IMAGE_HEIGHT);
 	return 0;
 }
