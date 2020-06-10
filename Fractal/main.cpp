@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdint.h>
 #include <algorithm>
+#include <cmath>
 
 #include "bmp.h"
 #include "RgbLut.h"
@@ -27,7 +28,7 @@ inline double iterNormal(double& real, double& imaginary, const double x, const 
 	return real * real + imaginary * imaginary;
 }
 
-inline uint32_t pixelValue(const double x, const double y)
+inline uint32_t getExitIters(const double x, const double y)
 {
 	const double MAX_RAD = 2.0;
 
@@ -60,7 +61,7 @@ void generateImage(uint8_t* image,
 			const double compX = x * xScale + offsetCompX;
 			const double compY = y * yScale + offsetCompY;
 
-			const uint32_t value = pixelValue(compX, compY);
+			const uint32_t value = getExitIters(compX, compY);
 			imgLine[3 * x] = lut.r[value];
 			imgLine[3 * x + 1] = lut.g[value];
 			imgLine[3 * x + 2] = lut.b[value];
