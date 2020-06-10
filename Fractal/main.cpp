@@ -89,6 +89,7 @@ int main(int argc, char ** argv)
 	uint8_t* outputImage = new uint8_t[3 * IMAGE_HEIGHT * IMAGE_WIDTH];
 
 	// color LUT generation
+	std::cout << "Create LUT...\n";
 	RgbLut lut;
 	{
 		lut.size = MAX_ITERS;
@@ -101,11 +102,16 @@ int main(int argc, char ** argv)
 		createLut(stops, lut);
 	}
 
+	std::cout << "Generate image...\n";
 	generateImage(outputImage,
 		IMAGE_WIDTH, IMAGE_HEIGHT, 3 * IMAGE_WIDTH,
 		PLANE_X_START, PLANE_Y_START, WIDTH_2_PLANE, HEIGHT_2_PLANE,
 		lut);
 
+	std::cout << "Save image...\n";
 	saveBmpRgb("fractal2.bmp", outputImage, IMAGE_WIDTH, IMAGE_HEIGHT);
+
+	std::cout << "Cleanup memory...\n";
+	delete[] outputImage;
 	return 0;
 }

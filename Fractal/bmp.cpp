@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <iostream>
 #include "bmp.h"
 
 int saveBmpRgb(const std::string& filename, const uint8_t* image, const int width, const int height)
@@ -40,5 +41,9 @@ int saveBmpRgb(const std::string& filename, const uint8_t* image, const int widt
         fwrite(image + (width * (height - i - 1) * 3), 3, width, f);
         fwrite(bmppad, 1, (4 - (width * 3) % 4) % 4, f);
     }
+
+    //std::cout << "Close file...\n";
     fclose(f);
+
+    return 0;
 }
