@@ -91,6 +91,8 @@ public:
                    const uint32_t maxIters, const RgbLut * lut,
                    const uint32_t threadCount, const uint32_t granularity);
 
+    Image * origImage;
+
     void run();
 };
 

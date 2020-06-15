@@ -3,6 +3,7 @@
 
 void Worker::run()
 {
+    std::cout << "Start " << uint64_t(this) << "\n";
     auto start = std::chrono::steady_clock::now();
 
     Stats stats;
@@ -30,6 +31,8 @@ void Worker::run()
         // if we are here then there is a chunk to work on
         ImageChunk current = chunks.front();
         chunks.pop();
+
+        //std::cout << uint64_t(current.image.data) << "\n";
 
         generateImage(&current.image,
                       current.offsetX, current.offsetY, current.scaleX, current.scaleY,
@@ -107,6 +110,10 @@ bool ImageGenerator::allocateWork(Worker * worker)
         ImageChunk chunk = chunks.front();
         chunks.pop();
         worker->addChunk(chunk);
+
+        uint32_t yCoord = (chunk.image.data - origImage->data) / (3 * origImage->width);
+        //std::cout << "Alloc " << yCoord << " to " << uint64_t(worker) << "\n";
+
         ok = true;
     }
 
@@ -120,6 +127,7 @@ ImageGenerator::ImageGenerator(Image * outputImage,
                                const uint32_t maxIters, const RgbLut * lut,
                                const uint32_t threadCount, const uint32_t granularity) : threadCount(threadCount), maxIters(maxIters), lut(lut)
 {
+    origImage = outputImage; // for debug
     const uint32_t chunkCount = threadCount * granularity;
     chunkify(outputImage, offsetX, offsetY, scaleX, scaleY, chunkCount);
 }
@@ -142,26 +150,25 @@ void ImageGenerator::run()
 
         worker->addChunk(chunk);
         workers.push_back(worker);
+
+        uint32_t yCoord = (chunk.image.data - origImage->data) / (3 * origImage->width);
+        //std::cout << "Alloc " << yCoord << " to " << uint64_t(worker) << "\n";
     }
 
     // create array of threads so we can wait on them
     std::vector<std::thread> workerThreads;
 
+    auto threadFunction = [](Worker * worker)
+    {
+        worker->run();
+    };
+
     // start the workers
     for (uint32_t i = 0; i < threadCount; i++)
     {
         Worker * worker = workers[i];
-        workerThreads.push_back(std::thread([&]()
-        {            
-            if (worker != 0)
-            {
-                worker->run();
-            }
-            else
-            {
-                std::cerr << "What the bloody fuck!\n";
-            }            
-        }));
+        
+        workerThreads.push_back(std::thread(threadFunction, worker));
     }
 
     // wait
