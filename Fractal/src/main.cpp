@@ -59,7 +59,7 @@ int main(int argc, char ** argv)
 							 PLANE_X_START, PLANE_Y_START, 
 							 WIDTH_2_PLANE, HEIGHT_2_PLANE, 
 							 MAX_ITERS, &lut,
-							 4, 4);
+							 4, 32);
 
 	generator.run();
 

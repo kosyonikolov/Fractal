@@ -3,7 +3,7 @@
 
 void Worker::run()
 {
-    std::cout << "Start " << uint64_t(this) << "\n";
+    //std::cout << "Start " << uint64_t(this) << "\n";
     auto start = std::chrono::steady_clock::now();
 
     Stats stats;
