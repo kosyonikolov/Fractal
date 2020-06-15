@@ -7,13 +7,12 @@
 #include <queue>
 #include <chrono>
 
+#include "Image.h"
 #include "RgbLut.h"
 
 struct ImageChunk
 {
-    uint8_t * image;
-    uint32_t width, height;
-    uint32_t stride;
+    Image image;
     double offsetX, offsetY;
     double scaleX, scaleY;
 };
@@ -57,9 +56,13 @@ class ImageGenerator
 private:
     std::queue<ImageChunk> chunks;
 
-    //int 
+    const uint32_t threadCount = 1; 
+
+    void chunkify();
 
 public:
+
+
     void run();
 };
 

@@ -23,16 +23,15 @@ static inline uint32_t getExitIters(const double x, const double y, const uint32
 	return i;
 }
 
-void generateImage(uint8_t* image,
-	const uint32_t width, const uint32_t height, const uint32_t stride,
-	const double offsetCompX, const double offsetCompY,
-	const double xScale, const double yScale,
-	const uint32_t maxIters, const RgbLut * lut)
+void generateImage(Image * image,
+				   const double offsetCompX, const double offsetCompY,
+				   const double xScale, const double yScale,
+				   const uint32_t maxIters, const RgbLut * lut)
 {
-	uint8_t* imgLine = image;
-	for (uint32_t y = 0; y < height; y++)
+	uint8_t* imgLine = image->data;
+	for (uint32_t y = 0; y < image->height; y++)
 	{
-		for (uint32_t x = 0; x < width; x++)
+		for (uint32_t x = 0; x < image->width; x++)
 		{
 			const double compX = x * xScale + offsetCompX;
 			const double compY = y * yScale + offsetCompY;
@@ -43,6 +42,6 @@ void generateImage(uint8_t* image,
 			imgLine[3 * x + 2] = lut->b[iters];
 		}
 
-		imgLine += stride;
+		imgLine += image->stride;
 	}
 }

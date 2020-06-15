@@ -29,7 +29,11 @@ int main(int argc, char ** argv)
 
 	const int MAX_ITERS = 100;
 
-	uint8_t* outputImage = new uint8_t[3 * IMAGE_HEIGHT * IMAGE_WIDTH];
+	Image outputImage;
+	outputImage.data = new uint8_t[3 * IMAGE_HEIGHT * IMAGE_WIDTH];
+	outputImage.width = IMAGE_WIDTH;
+	outputImage.height = IMAGE_HEIGHT;
+	outputImage.stride = 3 * IMAGE_WIDTH;
 
 	// color LUT generation
 	std::cout << "Create LUT...\n";
@@ -50,9 +54,6 @@ int main(int argc, char ** argv)
 
 	ImageChunk chunk;
 	chunk.image = outputImage;
-	chunk.width = IMAGE_WIDTH;
-	chunk.height = IMAGE_HEIGHT;
-	chunk.stride = 3 * IMAGE_WIDTH;
 	chunk.offsetX = PLANE_X_START;
 	chunk.offsetY = PLANE_Y_START;
 	chunk.scaleX = WIDTH_2_PLANE;
@@ -80,9 +81,9 @@ int main(int argc, char ** argv)
 	std::cout << "Generating took " << timeMs << " ms\n";
 
 	std::cout << "Save image...\n";
-	saveBmpRgb("fractal2.bmp", outputImage, IMAGE_WIDTH, IMAGE_HEIGHT);
+	saveBmpRgb("fractal2.bmp", &outputImage);
 
 	std::cout << "Cleanup memory...\n";
-	delete[] outputImage;
+	delete[] outputImage.data;
 	return 0;
 }

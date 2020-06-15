@@ -31,7 +31,7 @@ Worker::Stats Worker::run()
         ImageChunk current = chunks.front();
         chunks.pop();
 
-        generateImage(current.image, current.width, current.height, current.stride,
+        generateImage(&current.image,
                       current.offsetX, current.offsetY, current.scaleX, current.scaleY,
                       this->maxPixelIterations, this->lut);
 
