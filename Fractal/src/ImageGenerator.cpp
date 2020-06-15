@@ -155,13 +155,12 @@ void ImageGenerator::run()
         {            
             if (worker != 0)
             {
-                workers[i]->run();
+                worker->run();
             }
             else
             {
                 std::cerr << "What the bloody fuck!\n";
-            }
-            
+            }            
         }));
     }
 
