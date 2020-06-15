@@ -27,6 +27,9 @@
     <ClCompile Include="CommandArgsParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="generateImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bmp.h">
@@ -36,6 +39,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CommandArgsParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="generateImage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -9,10 +9,10 @@ void createLut(const std::vector<ColorStop> colorStops, RgbLut& outLut)
 	outLut.g = new uint8_t[LUT_SIZE];
 	outLut.b = new uint8_t[LUT_SIZE];
 
-	// set zero value to black -- coresponding to pt inside fractal set
-	outLut.r[0] = 0;
-	outLut.g[0] = 0;
-	outLut.b[0] = 0;
+	// set last value to black -- coresponding to pt inside fractal set
+	outLut.r[LUT_SIZE - 1] = 0;
+	outLut.g[LUT_SIZE - 1] = 0;
+	outLut.b[LUT_SIZE - 1] = 0;
 
 	// ------------------------------
 	// ---- linear interpolation ----
@@ -20,9 +20,9 @@ void createLut(const std::vector<ColorStop> colorStops, RgbLut& outLut)
 
 	// last table idx corresponds to 1.0, idx 1 corresponds to 0.0
 	const double IDX_TO_VAL = 1.0 / double(LUT_SIZE - 2);
-	for (int i = 1; i < LUT_SIZE; i++)
+	for (int i = 0; i < LUT_SIZE - 1; i++)
 	{
-		const double value = (i - 1) * IDX_TO_VAL;
+		const double value = i * IDX_TO_VAL;
 
 		// linear search: find between which stops the current value sits
 		// j holds the idx of the first stop that has a higher value
