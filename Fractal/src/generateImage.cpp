@@ -27,7 +27,7 @@ void generateImage(uint8_t* image,
 	const uint32_t width, const uint32_t height, const uint32_t stride,
 	const double offsetCompX, const double offsetCompY,
 	const double xScale, const double yScale,
-	const uint32_t maxIters, const RgbLut& lut)
+	const uint32_t maxIters, const RgbLut * lut)
 {
 	uint8_t* imgLine = image;
 	for (uint32_t y = 0; y < height; y++)
@@ -38,9 +38,9 @@ void generateImage(uint8_t* image,
 			const double compY = y * yScale + offsetCompY;
 
 			const uint32_t iters = getExitIters(compX, compY, maxIters);
-			imgLine[3 * x] = lut.r[iters];;
-			imgLine[3 * x + 1] = lut.g[iters];
-			imgLine[3 * x + 2] = lut.b[iters];
+			imgLine[3 * x] = lut->r[iters];;
+			imgLine[3 * x + 1] = lut->g[iters];
+			imgLine[3 * x + 2] = lut->b[iters];
 		}
 
 		imgLine += stride;

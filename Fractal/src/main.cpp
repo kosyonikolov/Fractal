@@ -8,6 +8,7 @@
 #include "bmp.h"
 #include "RgbLut.h"
 #include "generateImage.h"
+#include "ImageGenerator.h"
 
 using namespace std;
 
@@ -47,10 +48,30 @@ int main(int argc, char ** argv)
 
 	auto start = std::chrono::steady_clock::now();
 
+	ImageChunk chunk;
+	chunk.image = outputImage;
+	chunk.width = IMAGE_WIDTH;
+	chunk.height = IMAGE_HEIGHT;
+	chunk.stride = 3 * IMAGE_WIDTH;
+	chunk.offsetX = PLANE_X_START;
+	chunk.offsetY = PLANE_Y_START;
+	chunk.scaleX = WIDTH_2_PLANE;
+	chunk.scaleY = HEIGHT_2_PLANE;
+
+	Worker worker(MAX_ITERS, &lut, 0);
+	worker.addChunk(chunk);
+
+	Worker::Stats stats = worker.run();
+
+	std::cout << "Time: " << stats.time << std::endl;
+	std::cout << "Chunks: " << stats.chunkCount << std::endl;	
+
+	/*
 	generateImage(outputImage,
 		IMAGE_WIDTH, IMAGE_HEIGHT, 3 * IMAGE_WIDTH,
 		PLANE_X_START, PLANE_Y_START, WIDTH_2_PLANE, HEIGHT_2_PLANE,
-		MAX_ITERS, lut);
+		MAX_ITERS, &lut);
+	*/
 
 	auto end = std::chrono::steady_clock::now();
 
