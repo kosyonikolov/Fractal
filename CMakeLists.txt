@@ -6,9 +6,10 @@ enable_testing()
 
 set(CMAKE_CXX_STANDARD 11)
 
-include_directories(Fractal/)
+include_directories(Fractal/include)
 
-add_executable(RsaFractal ./Fractal/main.cpp ./Fractal/CommandArgsParser.cpp ./Fractal/RgbLut.cpp ./Fractal/bmp.cpp)
+add_executable(RsaFractal ./Fractal/src/main.cpp ./Fractal/src/CommandArgsParser.cpp ./Fractal/src/RgbLut.cpp ./Fractal/src/bmp.cpp
+                          ./Fractal/src/generateImage.cpp)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

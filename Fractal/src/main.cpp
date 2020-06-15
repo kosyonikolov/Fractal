@@ -14,8 +14,8 @@ using namespace std;
 int main(int argc, char ** argv)
 {
 	// image dimensions
-	const int IMAGE_WIDTH = 640;
-	const int IMAGE_HEIGHT = 480;
+	const int IMAGE_WIDTH = 1280;
+	const int IMAGE_HEIGHT = 720;
 
 	// complex plane
 	const double PLANE_X_START = -1.0;
