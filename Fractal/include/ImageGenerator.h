@@ -3,9 +3,12 @@
 
 #include <stdint.h>
 #include <thread>
+#include <mutex>
 #include <functional>
 #include <queue>
 #include <chrono>
+#include <vector>
+#include <iostream>
 
 #include "Image.h"
 #include "RgbLut.h"
@@ -31,37 +34,62 @@ public:
     // false means that no work was allocated and more work will not be available
     typedef std::function<bool(Worker*)> WorkAllocatorFunction;
 
-    Stats run();
+    void run();
 
     void addChunk(const ImageChunk & chunk);
+
+    Stats getExitStats() { return exitStats; }
 
     // Initialize a worker
     // allocator can be null - in this case the worker will stop
     // when the work chunks are over
     Worker(const uint32_t maxIters, const RgbLut * lut,
            WorkAllocatorFunction allocator) : maxPixelIterations(maxIters), lut(lut), allocateWork(allocator) {};
- 
+    
+    // ~Worker()
+    // {
+    //     std::cout << "bye worker\n";
+    // }
+
 private:
     // chunks that are waiting to be processed
     std::queue<ImageChunk> chunks;
-    
+        
     WorkAllocatorFunction allocateWork = 0;
 
     const uint32_t maxPixelIterations;
     const RgbLut * lut;
+
+    Stats exitStats;
 };
 
 class ImageGenerator
 {
 private:
     std::queue<ImageChunk> chunks;
+    std::mutex chunkQueueMutex;
+
+    std::vector<Worker*> workers;
 
     const uint32_t threadCount = 1; 
 
-    void chunkify();
+    const uint32_t maxIters = 100;
+    const RgbLut * lut;
+
+    // split the input image into chunks and push them to the queue
+    void chunkify(const Image * image, 
+                  const double offsetX, const double offsetY,
+                  const double scaleX, const double scaleY,
+                  const uint32_t count);
+
+    bool allocateWork(Worker * worker);
 
 public:
-
+    ImageGenerator(Image * outputImage, 
+                   const double offsetX, const double offsetY,
+                   const double scaleX, const double scaleY,
+                   const uint32_t maxIters, const RgbLut * lut,
+                   const uint32_t threadCount, const uint32_t granularity);
 
     void run();
 };

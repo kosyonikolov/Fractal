@@ -12,6 +12,8 @@ add_executable(RsaFractal ./Fractal/src/main.cpp ./Fractal/src/CommandArgsParser
                           ./Fractal/src/generateImage.cpp
                           ./Fractal/src/ImageGenerator.cpp)
 
+target_link_libraries(RsaFractal -lpthread)
+
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)

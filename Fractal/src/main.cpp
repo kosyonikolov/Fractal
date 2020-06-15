@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include <algorithm>
 #include <cmath>
-#include <complex>
 #include <chrono>
+#include <thread>
 
 #include "bmp.h"
 #include "RgbLut.h"
@@ -50,8 +50,20 @@ int main(int argc, char ** argv)
 
 	std::cout << "Generate image...\n";
 
+	int availableThreads = std::thread::hardware_concurrency();
+	std::cout << "Hardware threads: " << availableThreads << std::endl;
+
 	auto start = std::chrono::steady_clock::now();
 
+	ImageGenerator generator(&outputImage, 
+							 PLANE_X_START, PLANE_Y_START, 
+							 WIDTH_2_PLANE, HEIGHT_2_PLANE, 
+							 MAX_ITERS, &lut,
+							 4, 4);
+
+	generator.run();
+
+	/*
 	ImageChunk chunk;
 	chunk.image = outputImage;
 	chunk.offsetX = PLANE_X_START;
@@ -61,11 +73,12 @@ int main(int argc, char ** argv)
 
 	Worker worker(MAX_ITERS, &lut, 0);
 	worker.addChunk(chunk);
-
-	Worker::Stats stats = worker.run();
+	worker.run();
+	Worker::Stats stats = worker.getExitStats();
 
 	std::cout << "Time: " << stats.time << std::endl;
 	std::cout << "Chunks: " << stats.chunkCount << std::endl;	
+	*/
 
 	/*
 	generateImage(outputImage,

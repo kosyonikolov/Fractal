@@ -1,7 +1,7 @@
 #include "ImageGenerator.h"
 #include "generateImage.h"
 
-Worker::Stats Worker::run()
+void Worker::run()
 {
     auto start = std::chrono::steady_clock::now();
 
@@ -41,10 +41,133 @@ Worker::Stats Worker::run()
     auto end = std::chrono::steady_clock::now();
     stats.time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-    return stats;
+    this->exitStats = stats;
 }
 
 void Worker::addChunk(const ImageChunk & chunk)
 {
     chunks.push(chunk);
+}
+
+void ImageGenerator::chunkify(const Image * image, 
+                              const double offsetX, const double offsetY,
+                              const double scaleX, const double scaleY,
+                              const uint32_t count)
+{
+    // make each chunk span the whole image length-wise
+    const uint32_t chunkHeight = image->height / count;
+    uint32_t leftover = image->height % count;
+
+    uint32_t imgY = 0;
+
+    // create chunks
+    for (uint32_t i = 0; i < count; i++)
+    {
+        uint32_t currentHeight = chunkHeight;
+        // first chunks get to be larger
+        if (leftover > 0)
+        {
+            currentHeight++;
+            leftover--;
+        }
+
+        const uint32_t imgX = 0;
+
+        ImageChunk current;
+        current.image.data = image->data + imgY * image->stride;
+        current.image.width = image->width;
+        current.image.height = currentHeight;
+        current.image.stride = image->stride;
+
+        current.offsetX = imgX * scaleX + offsetX;
+        current.offsetY = imgY * scaleY + offsetY;
+        current.scaleX = scaleX;
+        current.scaleY = scaleY;
+
+        chunks.push(current);
+        imgY += currentHeight;
+    }
+
+    // sanity check
+    if (imgY != image->height)
+    {
+        throw std::runtime_error("Sanity check FAILED: summed image height is not equal to real height!\n");
+    }
+}
+
+bool ImageGenerator::allocateWork(Worker * worker)
+{
+    this->chunkQueueMutex.lock();
+
+    bool ok = false;
+
+    // simple version: allocate one work chunk to just the calling worker
+    if (chunks.size() > 0)
+    {
+        ImageChunk chunk = chunks.front();
+        chunks.pop();
+        worker->addChunk(chunk);
+        ok = true;
+    }
+
+    this->chunkQueueMutex.unlock();
+    return ok;
+}
+
+ImageGenerator::ImageGenerator(Image * outputImage, 
+                               const double offsetX, const double offsetY,
+                               const double scaleX, const double scaleY,
+                               const uint32_t maxIters, const RgbLut * lut,
+                               const uint32_t threadCount, const uint32_t granularity) : threadCount(threadCount), maxIters(maxIters), lut(lut)
+{
+    const uint32_t chunkCount = threadCount * granularity;
+    chunkify(outputImage, offsetX, offsetY, scaleX, scaleY, chunkCount);
+}
+
+void ImageGenerator::run()
+{
+    // encapsulate the allocator function
+    auto allocFunction = [&](Worker * worker) -> bool
+    {
+        return allocateWork(worker);
+    };
+
+    // create workers and give each one initial chunk
+    for (uint32_t i = 0; i < threadCount; i++)
+    {
+        Worker * worker = new Worker(this->maxIters, this->lut, allocFunction);
+        
+        ImageChunk chunk = chunks.front();
+        chunks.pop();
+
+        worker->addChunk(chunk);
+        workers.push_back(worker);
+    }
+
+    // create array of threads so we can wait on them
+    std::vector<std::thread> workerThreads;
+
+    // start the workers
+    for (uint32_t i = 0; i < threadCount; i++)
+    {
+        Worker * worker = workers[i];
+        workerThreads.push_back(std::thread([&]()
+        {            
+            if (worker != 0)
+            {
+                workers[i]->run();
+            }
+            else
+            {
+                std::cerr << "What the bloody fuck!\n";
+            }
+            
+        }));
+    }
+
+    // wait
+    for (uint32_t i = 0; i < threadCount; i++)
+    {
+        workerThreads[i].join();
+    }
 }
