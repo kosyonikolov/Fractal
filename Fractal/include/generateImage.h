@@ -5,7 +5,7 @@
 #include "RgbLut.h"
 #include "Image.h"
 
-void generateImage(Image * image,
+void generateImage(Image * image, FloatImage * dbgImage,
 				   const double offsetCompX, const double offsetCompY,
 				   const double xScale, const double yScale,
 				   const uint32_t maxIters, const RgbLut * lut);

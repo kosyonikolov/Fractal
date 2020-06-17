@@ -11,4 +11,12 @@ struct Image
     uint32_t stride;
 };
 
+struct FloatImage
+{
+    double * data;
+    uint32_t width;
+    uint32_t height;
+    uint32_t stride;
+};
+
 #endif

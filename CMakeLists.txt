@@ -14,6 +14,8 @@ add_executable(RsaFractal ./Fractal/src/main.cpp ./Fractal/src/CommandArgsParser
 
 target_link_libraries(RsaFractal -lpthread)
 
+target_compile_options(RsaFractal PRIVATE -march=native)
+
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)

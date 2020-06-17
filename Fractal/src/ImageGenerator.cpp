@@ -34,7 +34,7 @@ void Worker::run()
 
         //std::cout << uint64_t(current.image.data) << "\n";
 
-        generateImage(&current.image,
+        generateImage(&current.image, &current.dbgImage,
                       current.offsetX, current.offsetY, current.scaleX, current.scaleY,
                       this->maxPixelIterations, this->lut);
 
@@ -52,7 +52,7 @@ void Worker::addChunk(const ImageChunk & chunk)
     chunks.push(chunk);
 }
 
-void ImageGenerator::chunkify(const Image * image, 
+void ImageGenerator::chunkify(const Image * image, const FloatImage * dbgImage,
                               const double offsetX, const double offsetY,
                               const double scaleX, const double scaleY,
                               const uint32_t count)
@@ -86,6 +86,11 @@ void ImageGenerator::chunkify(const Image * image,
         current.offsetY = imgY * scaleY + offsetY;
         current.scaleX = scaleX;
         current.scaleY = scaleY;
+
+        current.dbgImage.data = dbgImage->data + imgY * dbgImage->stride;
+        current.dbgImage.width = dbgImage->width;
+        current.dbgImage.height = dbgImage->height;
+        current.dbgImage.stride = dbgImage->stride;
 
         chunks.push(current);
         imgY += currentHeight;
@@ -121,7 +126,7 @@ bool ImageGenerator::allocateWork(Worker * worker)
     return ok;
 }
 
-ImageGenerator::ImageGenerator(Image * outputImage, 
+ImageGenerator::ImageGenerator(Image * outputImage, FloatImage * dbgImage,
                                const double offsetX, const double offsetY,
                                const double scaleX, const double scaleY,
                                const uint32_t maxIters, const RgbLut * lut,
@@ -129,7 +134,7 @@ ImageGenerator::ImageGenerator(Image * outputImage,
 {
     origImage = outputImage; // for debug
     const uint32_t chunkCount = threadCount * granularity;
-    chunkify(outputImage, offsetX, offsetY, scaleX, scaleY, chunkCount);
+    chunkify(outputImage, dbgImage, offsetX, offsetY, scaleX, scaleY, chunkCount);
 }
 
 void ImageGenerator::run()

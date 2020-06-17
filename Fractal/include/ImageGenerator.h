@@ -16,6 +16,7 @@
 struct ImageChunk
 {
     Image image;
+    FloatImage dbgImage;
     double offsetX, offsetY;
     double scaleX, scaleY;
 };
@@ -77,7 +78,7 @@ private:
     const RgbLut * lut;
 
     // split the input image into chunks and push them to the queue
-    void chunkify(const Image * image, 
+    void chunkify(const Image * image, const FloatImage * dbgImage,
                   const double offsetX, const double offsetY,
                   const double scaleX, const double scaleY,
                   const uint32_t count);
@@ -85,7 +86,7 @@ private:
     bool allocateWork(Worker * worker);
 
 public:
-    ImageGenerator(Image * outputImage, 
+    ImageGenerator(Image * outputImage, FloatImage * outDbgImage,
                    const double offsetX, const double offsetY,
                    const double scaleX, const double scaleY,
                    const uint32_t maxIters, const RgbLut * lut,
