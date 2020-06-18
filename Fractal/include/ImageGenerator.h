@@ -11,12 +11,10 @@
 #include <iostream>
 
 #include "Image.h"
-#include "RgbLut.h"
 
 struct ImageChunk
 {
     Image image;
-    FloatImage dbgImage;
     double offsetX, offsetY;
     double scaleX, scaleY;
 };
@@ -44,14 +42,8 @@ public:
     // Initialize a worker
     // allocator can be null - in this case the worker will stop
     // when the work chunks are over
-    Worker(const uint32_t maxIters, const RgbLut * lut,
-           WorkAllocatorFunction allocator) : maxPixelIterations(maxIters), lut(lut), allocateWork(allocator) {};
+    Worker(const uint32_t maxIters, WorkAllocatorFunction allocator) : maxPixelIterations(maxIters), allocateWork(allocator) {};
     
-    // ~Worker()
-    // {
-    //     std::cout << "bye worker\n";
-    // }
-
 private:
     // chunks that are waiting to be processed
     std::queue<ImageChunk> chunks;
@@ -59,7 +51,6 @@ private:
     WorkAllocatorFunction allocateWork = 0;
 
     const uint32_t maxPixelIterations;
-    const RgbLut * lut;
 
     Stats exitStats;
 };
@@ -75,10 +66,9 @@ private:
     const uint32_t threadCount = 1; 
 
     const uint32_t maxIters = 100;
-    const RgbLut * lut;
 
     // split the input image into chunks and push them to the queue
-    void chunkify(const Image * image, const FloatImage * dbgImage,
+    void chunkify(const Image * image,
                   const double offsetX, const double offsetY,
                   const double scaleX, const double scaleY,
                   const uint32_t count);
@@ -86,10 +76,10 @@ private:
     bool allocateWork(Worker * worker);
 
 public:
-    ImageGenerator(Image * outputImage, FloatImage * outDbgImage,
+    ImageGenerator(Image * outputImage,
                    const double offsetX, const double offsetY,
                    const double scaleX, const double scaleY,
-                   const uint32_t maxIters, const RgbLut * lut,
+                   const uint32_t maxIters,
                    const uint32_t threadCount, const uint32_t granularity);
 
     Image * origImage;

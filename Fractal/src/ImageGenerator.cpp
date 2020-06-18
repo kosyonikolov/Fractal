@@ -34,9 +34,9 @@ void Worker::run()
 
         //std::cout << uint64_t(current.image.data) << "\n";
 
-        generateImage(&current.image, &current.dbgImage,
+        generateImage(&current.image,
                       current.offsetX, current.offsetY, current.scaleX, current.scaleY,
-                      this->maxPixelIterations, this->lut);
+                      this->maxPixelIterations);
 
         stats.chunkCount++;
     }
@@ -52,7 +52,7 @@ void Worker::addChunk(const ImageChunk & chunk)
     chunks.push(chunk);
 }
 
-void ImageGenerator::chunkify(const Image * image, const FloatImage * dbgImage,
+void ImageGenerator::chunkify(const Image * image,
                               const double offsetX, const double offsetY,
                               const double scaleX, const double scaleY,
                               const uint32_t count)
@@ -86,11 +86,6 @@ void ImageGenerator::chunkify(const Image * image, const FloatImage * dbgImage,
         current.offsetY = imgY * scaleY + offsetY;
         current.scaleX = scaleX;
         current.scaleY = scaleY;
-
-        current.dbgImage.data = dbgImage->data + imgY * dbgImage->stride;
-        current.dbgImage.width = dbgImage->width;
-        current.dbgImage.height = dbgImage->height;
-        current.dbgImage.stride = dbgImage->stride;
 
         chunks.push(current);
         imgY += currentHeight;
@@ -126,15 +121,15 @@ bool ImageGenerator::allocateWork(Worker * worker)
     return ok;
 }
 
-ImageGenerator::ImageGenerator(Image * outputImage, FloatImage * dbgImage,
+ImageGenerator::ImageGenerator(Image * outputImage,
                                const double offsetX, const double offsetY,
                                const double scaleX, const double scaleY,
-                               const uint32_t maxIters, const RgbLut * lut,
-                               const uint32_t threadCount, const uint32_t granularity) : threadCount(threadCount), maxIters(maxIters), lut(lut)
+                               const uint32_t maxIters,
+                               const uint32_t threadCount, const uint32_t granularity) : threadCount(threadCount), maxIters(maxIters)
 {
     origImage = outputImage; // for debug
     const uint32_t chunkCount = threadCount * granularity;
-    chunkify(outputImage, dbgImage, offsetX, offsetY, scaleX, scaleY, chunkCount);
+    chunkify(outputImage, offsetX, offsetY, scaleX, scaleY, chunkCount);
 }
 
 void ImageGenerator::run()
@@ -148,7 +143,7 @@ void ImageGenerator::run()
     // create workers and give each one initial chunk
     for (uint32_t i = 0; i < threadCount; i++)
     {
-        Worker * worker = new Worker(this->maxIters, this->lut, allocFunction);
+        Worker * worker = new Worker(this->maxIters, allocFunction);
         
         ImageChunk chunk = chunks.front();
         chunks.pop();

@@ -2,7 +2,7 @@
 #include "generateImage.h"
 
 // Escape time pixel value algorithm
-// There is no escaper radius for this formula, so just loop until
+// There is no escape radius for this formula, so just loop until
 // the values become inf or nan
 static inline uint32_t getExitIters(const double x, const double y, const uint32_t maxIters, double * outSum, double * outTheta)
 {
@@ -24,7 +24,6 @@ static inline uint32_t getExitIters(const double x, const double y, const uint32
 		}
 
 		lastZ = z;
-
 		const double r = std::abs(z);
 		if (std::isfinite(r))
 		{
@@ -32,20 +31,20 @@ static inline uint32_t getExitIters(const double x, const double y, const uint32
 		}
 	}
 
+	// calculate atan just once - it's slow
 	*outTheta = std::atan2(lastZ.real(), lastZ.imag());;
 	*outSum = sum + std::log(double(i));
 	return i;
 }
 
-void generateImage(Image * image, FloatImage * dbgImage,
+void generateImage(Image * image,
 				   const double offsetCompX, const double offsetCompY,
 				   const double xScale, const double yScale,
-				   const uint32_t maxIters, const RgbLut * lut)
+				   const uint32_t maxIters)
 {
-	uint8_t* imgLine = image->data;
-	double * dbgLine = dbgImage->data;
 	for (uint32_t y = 0; y < image->height; y++)
 	{
+		uint8_t* imgLine = image->data + y * image->stride;
 		for (uint32_t x = 0; x < image->width; x++)
 		{
 			const double compX = x * xScale + offsetCompX;
@@ -53,16 +52,17 @@ void generateImage(Image * image, FloatImage * dbgImage,
 
 			double sum = 0;
 			double theta = 0;
-			const uint32_t iters = getExitIters(compX, compY, maxIters, &sum, &theta);
+			getExitIters(compX, compY, maxIters, &sum, &theta);
 
-			imgLine[3 * x] = lut->r[iters];;
-			imgLine[3 * x + 1] = lut->g[iters];
-			imgLine[3 * x + 2] = lut->b[iters];
-			dbgLine[2 * x] = sum;
-			dbgLine[2 * x + 1] = theta;
+			// create color in YUV domain
+			const double y = 180.0 * 0.5 * (std::cos(0.8 * sum) + 1);
+			const double u = 200.0 * 0.5 * (std::sin(theta) + 1);
+			const double v = 200.0 * 0.5 * (std::cos(theta) + 1);
+
+			// convert to rgb on the fly
+			*imgLine++ = std::min(255.0, std::max(0.0, y + 1.772 * (v - 128)));
+			*imgLine++ = std::min(255.0, std::max(0.0, y - 0.344136 * (v - 128) - 0.714136 * (u - 128)));
+			*imgLine++ = std::min(255.0, std::max(0.0, y + 1.402 * (u - 128)));
 		}
-
-		imgLine += image->stride;
-		dbgLine += dbgImage->stride;
 	}
 }

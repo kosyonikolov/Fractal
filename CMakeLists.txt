@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 include_directories(Fractal/include)
 
-add_executable(RsaFractal ./Fractal/src/main.cpp ./Fractal/src/CommandArgsParser.cpp ./Fractal/src/RgbLut.cpp ./Fractal/src/bmp.cpp
+add_executable(RsaFractal ./Fractal/src/main.cpp ./Fractal/src/CommandArgsParser.cpp ./Fractal/src/bmp.cpp
                           ./Fractal/src/generateImage.cpp
                           ./Fractal/src/ImageGenerator.cpp)
 

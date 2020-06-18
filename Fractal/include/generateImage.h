@@ -2,12 +2,11 @@
 #define GENERATE_IMAGE_H
 
 #include <stdint.h>
-#include "RgbLut.h"
 #include "Image.h"
 
-void generateImage(Image * image, FloatImage * dbgImage,
+void generateImage(Image * image,
 				   const double offsetCompX, const double offsetCompY,
 				   const double xScale, const double yScale,
-				   const uint32_t maxIters, const RgbLut * lut);
+				   const uint32_t maxIters);
 
 #endif
