@@ -4,21 +4,26 @@
 // Escape time pixel value algorithm
 // There is no escaper radius for this formula, so just loop until
 // the values become inf or nan
-static inline uint32_t getExitIters(const double x, const double y, const uint32_t maxIters, double * outSum)
+static inline uint32_t getExitIters(const double x, const double y, const uint32_t maxIters, double * outSum, double * outTheta)
 {
 	const std::complex<double> c(x, y);
 	std::complex<double> z(0, 0);
 
 	int i = 0;
 	double sum = 0;
+	std::complex<double> lastZ = z;
 
 	for (; i < maxIters; i++)
 	{
+		//auto sq = z * z;
+		//z = std::exp(sq) * sq + c;
 		z = std::exp(z * z + c);
 		if (!std::isfinite(z.real()) || !std::isfinite(z.imag()))
 		{
 			break;
 		}
+
+		lastZ = z;
 
 		const double r = std::abs(z);
 		if (std::isfinite(r))
@@ -27,7 +32,8 @@ static inline uint32_t getExitIters(const double x, const double y, const uint32
 		}
 	}
 
-	*outSum = sum;
+	*outTheta = std::atan2(lastZ.real(), lastZ.imag());;
+	*outSum = sum + std::log(double(i));
 	return i;
 }
 
@@ -46,12 +52,14 @@ void generateImage(Image * image, FloatImage * dbgImage,
 			const double compY = y * yScale + offsetCompY;
 
 			double sum = 0;
-			const uint32_t iters = getExitIters(compX, compY, maxIters, &sum);
+			double theta = 0;
+			const uint32_t iters = getExitIters(compX, compY, maxIters, &sum, &theta);
 
 			imgLine[3 * x] = lut->r[iters];;
 			imgLine[3 * x + 1] = lut->g[iters];
 			imgLine[3 * x + 2] = lut->b[iters];
-			dbgLine[x] = sum;
+			dbgLine[2 * x] = sum;
+			dbgLine[2 * x + 1] = theta;
 		}
 
 		imgLine += image->stride;
