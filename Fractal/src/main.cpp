@@ -49,7 +49,7 @@ int main(int argc, char ** argv)
 							 X_SCALE, Y_SCALE, 
 							 MAX_ITERS,
 							 config.threadCount, config.granularity,
-							 config.quiet);
+							 config.verbosity);
 
 	generator.run();
 

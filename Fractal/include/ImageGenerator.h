@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include "Image.h"
+#include "Verbosity.h"
 
 struct ImageChunk
 {
@@ -45,8 +46,8 @@ public:
     // Initialize a worker
     // allocator can be null - in this case the worker will stop
     // when the work chunks are over
-    Worker(const uint32_t id, const uint32_t maxIters, WorkAllocatorFunction allocator, const bool quiet) : 
-                id(id), maxPixelIterations(maxIters), allocateWork(allocator), quiet(quiet) {};
+    Worker(const uint32_t id, const uint32_t maxIters, WorkAllocatorFunction allocator, const Verbosity verbosity) : 
+                id(id), maxPixelIterations(maxIters), allocateWork(allocator), v(verbosity) {};
     
 private:
     // chunks that are waiting to be processed
@@ -54,7 +55,7 @@ private:
     WorkAllocatorFunction allocateWork = 0;
     const uint32_t maxPixelIterations;    
     Stats exitStats;
-    const bool quiet = false;
+    const Verbosity v;
 };
 
 class ImageGenerator
@@ -69,7 +70,7 @@ private:
 
     const uint32_t maxIters = 100;
 
-    const bool isQuiet = false;
+    const Verbosity v = Verbosity::Silent;
 
     // split the input image into chunks and push them to the queue
     void chunkify(const Image * image,
@@ -87,7 +88,7 @@ public:
                    const double scaleX, const double scaleY,
                    const uint32_t maxIters,
                    const uint32_t threadCount, const uint32_t granularity,
-                   const bool quiet);
+                   const Verbosity v);
 
     ~ImageGenerator();
 
@@ -95,5 +96,18 @@ public:
 
     void run();
 };
+
+/*
+{
+    "name": "NDK arm64-v8a",
+    "toolchainFile" : "/home/kosyo/Android/Sdk/ndk/21.3.6528147/build/cmake/android.toolchain.cmake",
+    "cmakeSettings" :
+    {
+      "ANDROID_ABI" : "arm64-v8a",
+      "ANDROID_PLATFORM" : "android-21"
+    }
+  },
+*/
+
 
 #endif

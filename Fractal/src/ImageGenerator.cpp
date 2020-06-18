@@ -5,7 +5,7 @@
 
 void Worker::run()
 {
-    if (!this->quiet)
+    if (this->v >= Verbosity::Full)
     {
         std::cout << "W" << this->id << ": Start\n";
     }
@@ -38,7 +38,7 @@ void Worker::run()
         ImageChunk current = chunks.front();
         chunks.pop();
 
-        if (!this->quiet)
+        if (this->v >= Verbosity::Full)
         {
             std::cout << "W" << this->id << ": Starting work on chunk " << current.id << "\n";
         }
@@ -55,7 +55,7 @@ void Worker::run()
 
     this->exitStats = stats;
 
-    if (!this->quiet)
+    if (this->v >= Verbosity::Full)
     {
         std::cout << "W" << this->id << ": Stop\n";
     }
@@ -170,7 +170,7 @@ ImageGenerator::ImageGenerator(Image * outputImage,
                                const double scaleX, const double scaleY,
                                const uint32_t maxIters,
                                const uint32_t threadCount, const uint32_t granularity,
-                               const bool quiet) : threadCount(threadCount), maxIters(maxIters), isQuiet(quiet)
+                               const Verbosity v) : threadCount(threadCount), maxIters(maxIters), v(v)
 {
     origImage = outputImage; // for debug
     const uint32_t chunkCount = threadCount * granularity;
@@ -196,7 +196,7 @@ void ImageGenerator::run()
     // create workers and give each one initial chunk
     for (uint32_t i = 0; i < threadCount; i++)
     {
-        Worker * worker = new Worker(i, this->maxIters, allocFunction, this->isQuiet);
+        Worker * worker = new Worker(i, this->maxIters, allocFunction, this->v);
         
         ImageChunk chunk = chunks.front();
         chunks.pop();
@@ -230,7 +230,7 @@ void ImageGenerator::run()
         workerThreads[i].join();
     }
 
-    if (!this->isQuiet)
+    if (this->v >= Verbosity::Stats)
     {
         reportStats();
     }

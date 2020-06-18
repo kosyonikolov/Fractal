@@ -23,7 +23,7 @@ bool parseConfig(char** args, const uint32_t count, Config * outConfig)
 
 			if (option == "q" || option == "quiet")
 			{
-				outConfig->quiet = true;
+				outConfig->verbosity = Verbosity::Silent;
 				continue;
 			}
 
@@ -144,6 +144,24 @@ bool parseConfig(char** args, const uint32_t count, Config * outConfig)
 		if (fileStr != "")
 		{
 			outConfig->outputFileName = fileStr;
+		}
+	}
+
+	// parse verbosity
+	{
+		const std::string verbosityStr = findValue("v", "verbosity");
+		if (verbosityStr != "")
+		{
+			try
+			{
+				int v = std::stoi(verbosityStr);
+				outConfig->verbosity = Verbosity(v);
+			}
+			catch (std::exception& e)
+			{
+				std::cerr << __FUNCTION__ << ": Couldn't parse granularity from " << verbosityStr << "\n";
+				return false;
+			}
 		}
 	}
 

@@ -12,9 +12,13 @@ add_executable(RsaFractal ./Fractal/src/main.cpp ./Fractal/src/Config.cpp ./Frac
                           ./Fractal/src/generateImage.cpp
                           ./Fractal/src/ImageGenerator.cpp)
 
-target_link_libraries(RsaFractal -lpthread)
+if (NOT ANDROID)
+    message("PC build")
 
-target_compile_options(RsaFractal PRIVATE -march=native)
+    # Android doesnt need lpthread and doesn't support -march=native
+    target_link_libraries(RsaFractal -lpthread)
+    target_compile_options(RsaFractal PRIVATE -march=native)
+endif()
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <string>
 
+#include "Verbosity.h"
+
 struct Config
 {
     // size of image
@@ -19,7 +21,7 @@ struct Config
 	uint32_t threadCount = 1;
     uint32_t granularity = 1;
 
-    bool quiet = false;
+    Verbosity verbosity = Verbosity::Stats;
 
 	std::string outputFileName = "zad19.bmp";
 };
