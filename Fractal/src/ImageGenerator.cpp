@@ -1,8 +1,14 @@
 #include "ImageGenerator.h"
 #include "generateImage.h"
 
+#include <cmath>
+
 void Worker::run()
 {
+    if (!this->quiet)
+    {
+        std::cout << "W" << this->id << ": Start\n";
+    }
     //std::cout << "Start " << uint64_t(this) << "\n";
     auto start = std::chrono::steady_clock::now();
 
@@ -32,7 +38,10 @@ void Worker::run()
         ImageChunk current = chunks.front();
         chunks.pop();
 
-        //std::cout << uint64_t(current.image.data) << "\n";
+        if (!this->quiet)
+        {
+            std::cout << "W" << this->id << ": Starting work on chunk " << current.id << "\n";
+        }
 
         generateImage(&current.image,
                       current.offsetX, current.offsetY, current.scaleX, current.scaleY,
@@ -45,6 +54,11 @@ void Worker::run()
     stats.time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
     this->exitStats = stats;
+
+    if (!this->quiet)
+    {
+        std::cout << "W" << this->id << ": Stop\n";
+    }
 }
 
 void Worker::addChunk(const ImageChunk & chunk)
@@ -77,6 +91,8 @@ void ImageGenerator::chunkify(const Image * image,
         const uint32_t imgX = 0;
 
         ImageChunk current;
+        current.id = i;
+
         current.image.data = image->data + imgY * image->stride;
         current.image.width = image->width;
         current.image.height = currentHeight;
@@ -121,15 +137,52 @@ bool ImageGenerator::allocateWork(Worker * worker)
     return ok;
 }
 
+void ImageGenerator::reportStats()
+{
+    std::cout << "Worker\tTime\tChunks\n";
+
+    // sums for stdev calculation
+    double sum = 0;
+    double sumSq = 0;
+
+    uint64_t maxVal = 0;
+
+    for (const Worker * w : this->workers)
+    {
+        const Worker::Stats stats = w->getExitStats();
+        std::cout << w->id << "\t" << stats.time << "\t" << stats.chunkCount << "\n";
+
+        sum += stats.time;
+        sumSq += stats.time * stats.time;
+        maxVal = std::max(maxVal, stats.time);
+    }
+
+    const double n = this->workers.size();
+    const double mean = sum / n;
+    const double stDev = std::sqrt(sumSq / n - mean * mean);
+    const double stDevPercent = 100 * stDev / maxVal;
+
+    std::cout << "Time std: " << stDev << " ms / " << stDevPercent << " %\n";
+}
+
 ImageGenerator::ImageGenerator(Image * outputImage,
                                const double offsetX, const double offsetY,
                                const double scaleX, const double scaleY,
                                const uint32_t maxIters,
-                               const uint32_t threadCount, const uint32_t granularity) : threadCount(threadCount), maxIters(maxIters)
+                               const uint32_t threadCount, const uint32_t granularity,
+                               const bool quiet) : threadCount(threadCount), maxIters(maxIters), isQuiet(quiet)
 {
     origImage = outputImage; // for debug
     const uint32_t chunkCount = threadCount * granularity;
     chunkify(outputImage, offsetX, offsetY, scaleX, scaleY, chunkCount);
+}
+
+ImageGenerator::~ImageGenerator()
+{
+    for (uint32_t i = 0; i < workers.size(); i++)
+    {
+        delete workers[i];
+    }
 }
 
 void ImageGenerator::run()
@@ -143,7 +196,7 @@ void ImageGenerator::run()
     // create workers and give each one initial chunk
     for (uint32_t i = 0; i < threadCount; i++)
     {
-        Worker * worker = new Worker(this->maxIters, allocFunction);
+        Worker * worker = new Worker(i, this->maxIters, allocFunction, this->isQuiet);
         
         ImageChunk chunk = chunks.front();
         chunks.pop();
@@ -175,5 +228,10 @@ void ImageGenerator::run()
     for (uint32_t i = 0; i < threadCount; i++)
     {
         workerThreads[i].join();
+    }
+
+    if (!this->isQuiet)
+    {
+        reportStats();
     }
 }

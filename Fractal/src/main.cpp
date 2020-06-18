@@ -37,10 +37,10 @@ int main(int argc, char ** argv)
 	outputImage.height = IMAGE_HEIGHT;
 	outputImage.stride = 3 * IMAGE_WIDTH;
 
-	std::cout << "Generate image...\n";
+	//std::cout << "Generate image...\n";
 
 	int availableThreads = std::thread::hardware_concurrency();
-	std::cout << "Hardware threads: " << availableThreads << std::endl;
+	//std::cout << "Hardware threads: " << availableThreads << std::endl;
 
 	auto start = std::chrono::steady_clock::now();
 
@@ -48,7 +48,8 @@ int main(int argc, char ** argv)
 							 config.compOffX, config.compOffY, 
 							 X_SCALE, Y_SCALE, 
 							 MAX_ITERS,
-							 config.threadCount, config.granularity);
+							 config.threadCount, config.granularity,
+							 config.quiet);
 
 	generator.run();
 
@@ -58,10 +59,10 @@ int main(int argc, char ** argv)
 
 	std::cout << "Generating took " << timeMs << " ms\n";
 
-	std::cout << "Save image...\n";
+	//std::cout << "Save image...\n";
 	saveBmpRgb(config.outputFileName, &outputImage);
 
-	std::cout << "Cleanup memory...\n";
+	//std::cout << "Cleanup memory...\n";
 	delete[] outputImage.data;
 	return 0;
 }

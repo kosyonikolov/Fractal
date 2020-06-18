@@ -14,6 +14,7 @@
 
 struct ImageChunk
 {
+    uint32_t id;
     Image image;
     double offsetX, offsetY;
     double scaleX, scaleY;
@@ -33,26 +34,27 @@ public:
     // false means that no work was allocated and more work will not be available
     typedef std::function<bool(Worker*)> WorkAllocatorFunction;
 
+    const uint32_t id;
+
     void run();
 
     void addChunk(const ImageChunk & chunk);
 
-    Stats getExitStats() { return exitStats; }
+    Stats getExitStats() const { return exitStats; }
 
     // Initialize a worker
     // allocator can be null - in this case the worker will stop
     // when the work chunks are over
-    Worker(const uint32_t maxIters, WorkAllocatorFunction allocator) : maxPixelIterations(maxIters), allocateWork(allocator) {};
+    Worker(const uint32_t id, const uint32_t maxIters, WorkAllocatorFunction allocator, const bool quiet) : 
+                id(id), maxPixelIterations(maxIters), allocateWork(allocator), quiet(quiet) {};
     
 private:
     // chunks that are waiting to be processed
     std::queue<ImageChunk> chunks;
-        
     WorkAllocatorFunction allocateWork = 0;
-
-    const uint32_t maxPixelIterations;
-
+    const uint32_t maxPixelIterations;    
     Stats exitStats;
+    const bool quiet = false;
 };
 
 class ImageGenerator
@@ -67,6 +69,8 @@ private:
 
     const uint32_t maxIters = 100;
 
+    const bool isQuiet = false;
+
     // split the input image into chunks and push them to the queue
     void chunkify(const Image * image,
                   const double offsetX, const double offsetY,
@@ -75,12 +79,17 @@ private:
 
     bool allocateWork(Worker * worker);
 
+    void reportStats();
+
 public:
     ImageGenerator(Image * outputImage,
                    const double offsetX, const double offsetY,
                    const double scaleX, const double scaleY,
                    const uint32_t maxIters,
-                   const uint32_t threadCount, const uint32_t granularity);
+                   const uint32_t threadCount, const uint32_t granularity,
+                   const bool quiet);
+
+    ~ImageGenerator();
 
     Image * origImage;
 

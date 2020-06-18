@@ -128,7 +128,7 @@ bool parseConfig(char** args, const uint32_t count, Config * outConfig)
 			try
 			{
 				int g = std::stoi(granularityStr);
-				outConfig->granularity = count;
+				outConfig->granularity = g;
 			}
 			catch (std::exception& e)
 			{
