@@ -27,6 +27,7 @@ public:
     struct Stats
     {
         uint64_t time; // total runtime, milliseconds
+        uint64_t waitTime; // total time waiting for work, milliseconds
         uint32_t chunkCount; // number of chunks processed by the worker
     };
 

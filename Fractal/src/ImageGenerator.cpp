@@ -14,6 +14,7 @@ void Worker::run()
 
     Stats stats;
     stats.chunkCount = 0;
+    stats.waitTime = 0;
 
     while (true)
     {
@@ -26,8 +27,12 @@ void Worker::run()
                 break;
             }
 
+            auto waitStart = std::chrono::steady_clock::now();
             // call the allocator to see if it gives us work
             bool ok = allocateWork(this);
+            auto waitEnd = std::chrono::steady_clock::now();
+            stats.waitTime += std::chrono::duration_cast<std::chrono::milliseconds>(waitEnd - waitStart).count();
+
             if (!ok)
             {
                 break;
@@ -139,22 +144,24 @@ bool ImageGenerator::allocateWork(Worker * worker)
 
 void ImageGenerator::reportStats()
 {
-    std::cout << "Worker\tTime\tChunks\n";
+    std::cout << "Worker\tTime\tChunks\tWait time\n";
 
     // sums for stdev calculation
     double sum = 0;
     double sumSq = 0;
 
     uint64_t maxVal = 0;
+    uint64_t minVal = 9999999999999;
 
     for (const Worker * w : this->workers)
     {
         const Worker::Stats stats = w->getExitStats();
-        std::cout << w->id << "\t" << stats.time << "\t" << stats.chunkCount << "\n";
+        std::cout << w->id << "\t" << stats.time << "\t" << stats.chunkCount << "\t" << stats.waitTime << "\n";
 
         sum += stats.time;
         sumSq += stats.time * stats.time;
         maxVal = std::max(maxVal, stats.time);
+        minVal = std::min(minVal, stats.time);
     }
 
     const double n = this->workers.size();
@@ -162,7 +169,11 @@ void ImageGenerator::reportStats()
     const double stDev = std::sqrt(sumSq / n - mean * mean);
     const double stDevPercent = 100 * stDev / maxVal;
 
+    uint64_t peak2peak = maxVal - minVal;
+    double peak2peakPercent = 100.0 * peak2peak / maxVal;
+
     std::cout << "Time std: " << stDev << " ms / " << stDevPercent << " %\n";
+    std::cout << "Peak to peak: " << peak2peak << " ms / " << peak2peakPercent << " %\n";
 }
 
 ImageGenerator::ImageGenerator(Image * outputImage,
