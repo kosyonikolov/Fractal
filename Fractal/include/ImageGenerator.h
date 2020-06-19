@@ -56,17 +56,4 @@ public:
     void run();
 };
 
-/*
-{
-    "name": "NDK arm64-v8a",
-    "toolchainFile" : "/home/kosyo/Android/Sdk/ndk/21.3.6528147/build/cmake/android.toolchain.cmake",
-    "cmakeSettings" :
-    {
-      "ANDROID_ABI" : "arm64-v8a",
-      "ANDROID_PLATFORM" : "android-21"
-    }
-  },
-*/
-
-
 #endif

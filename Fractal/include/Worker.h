@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <queue>
+#include <functional>
 #include "Image.h"
 #include "Verbosity.h"
 
