@@ -10,6 +10,7 @@ include_directories(Fractal/include)
 
 add_executable(RsaFractal ./Fractal/src/main.cpp ./Fractal/src/Config.cpp ./Fractal/src/bmp.cpp
                           ./Fractal/src/generateImage.cpp
+                          ./Fractal/src/Worker.cpp
                           ./Fractal/src/ImageGenerator.cpp)
 
 if (NOT ANDROID)

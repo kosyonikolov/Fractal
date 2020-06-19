@@ -14,8 +14,7 @@ TYPE=$1
 echo "Type = $TYPE"
 if [[ $TYPE == "dev" ]]
 then
-    # TODO adb push
-    ./device_upload.sh
+    #./device_upload.sh
     CMD=./run_device.sh
 fi
 
