@@ -19,7 +19,8 @@ struct Config
 	double compOffY = -1.0;
 
 	uint32_t threadCount = 1;
-    uint32_t granularity = 1;
+    uint32_t chunkWidth = 256;
+	uint32_t chunkHeight = 64;
 
     Verbosity verbosity = Verbosity::Stats;
 

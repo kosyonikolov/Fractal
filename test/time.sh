@@ -19,17 +19,17 @@ then
     CMD=./run_device.sh
 fi
 
-# write header
-OUT_FILE="stat_$TYPE.csv"
-echo "threads,granularity,time" > "$OUT_FILE"
-
-LOG_FILE="$TYPE.log"
-date > "$LOG_FILE"
-
 SIZE="$2"
 C_SIZE="$3"
 GRANULARITY="$4"
 ATTEMPTS=5
+
+# write header
+OUT_FILE="stat_${TYPE}_${GRANULARITY}.csv"
+echo "threads,granularity,time" > "$OUT_FILE"
+
+LOG_FILE="${TYPE}_${GRANULARITY}.log"
+date > "$LOG_FILE"
 
 shift 4
 

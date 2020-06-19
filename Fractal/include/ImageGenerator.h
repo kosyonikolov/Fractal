@@ -77,7 +77,7 @@ private:
     void chunkify(const Image * image,
                   const double offsetX, const double offsetY,
                   const double scaleX, const double scaleY,
-                  const uint32_t count);
+                  const uint32_t width, const uint32_t height);
 
     bool allocateWork(Worker * worker);
 
@@ -88,7 +88,8 @@ public:
                    const double offsetX, const double offsetY,
                    const double scaleX, const double scaleY,
                    const uint32_t maxIters,
-                   const uint32_t threadCount, const uint32_t granularity,
+                   const uint32_t threadCount,
+                   const uint32_t width, const uint32_t height,
                    const Verbosity v);
 
     ~ImageGenerator();

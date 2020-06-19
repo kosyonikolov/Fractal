@@ -5,6 +5,8 @@ enum Verbosity
 {
     Silent = 0,
     Stats,
+    Times,
+    Preparation,
     Full
 };
 

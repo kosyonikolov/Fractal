@@ -48,7 +48,8 @@ int main(int argc, char ** argv)
 							 config.compOffX, config.compOffY, 
 							 X_SCALE, Y_SCALE, 
 							 MAX_ITERS,
-							 config.threadCount, config.granularity,
+							 config.threadCount,
+							 config.chunkWidth, config.chunkHeight,
 							 config.verbosity);
 
 	generator.run();

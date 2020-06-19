@@ -120,19 +120,23 @@ bool parseConfig(char** args, const uint32_t count, Config * outConfig)
 		}
 	}
 
-	// parse granularity
+	// parse chunk size
 	{
-		const std::string granularityStr = findValue("g", "granularity");
-		if (granularityStr != "")
+		const std::string chunkString = findValue("c", "chunk");
+		if (chunkString != "")
 		{
-			try
+			std::stringstream ss(chunkString);
+
+			uint32_t w, h;
+			char c;
+			if (ss >> w >> c >> h)
 			{
-				int g = std::stoi(granularityStr);
-				outConfig->granularity = g;
+				outConfig->chunkWidth = w;
+				outConfig->chunkHeight = h;
 			}
-			catch (std::exception& e)
+			else
 			{
-				std::cerr << __FUNCTION__ << ": Couldn't parse granularity from " << granularityStr << "\n";
+				std::cerr << __FUNCTION__ << ": Couldn't parse chunk size from " << chunkString << "\n";
 				return false;
 			}
 		}

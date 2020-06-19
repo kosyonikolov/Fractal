@@ -74,48 +74,36 @@ void Worker::addChunk(const ImageChunk & chunk)
 void ImageGenerator::chunkify(const Image * image,
                               const double offsetX, const double offsetY,
                               const double scaleX, const double scaleY,
-                              const uint32_t count)
+                              const uint32_t width, const uint32_t height)
 {
-    // make each chunk span the whole image length-wise
-    const uint32_t chunkHeight = image->height / count;
-    uint32_t leftover = image->height % count;
-
-    uint32_t imgY = 0;
-
-    // create chunks
-    for (uint32_t i = 0; i < count; i++)
+    uint32_t chunkId = 0;
+    for (uint32_t yStart = 0; yStart < image->height; yStart += height)
     {
-        uint32_t currentHeight = chunkHeight;
-        // first chunks get to be larger
-        if (leftover > 0)
+        const uint32_t chunkHeight = std::min(height, image->height - yStart);
+        for (uint32_t xStart = 0; xStart < image->width; xStart += width)
         {
-            currentHeight++;
-            leftover--;
+            const uint32_t chunkWidth = std::min(width, image->width - xStart);    
+
+            ImageChunk current;
+            current.id = chunkId++;
+
+            current.image.data = image->data + yStart * image->stride + xStart * 3;
+            current.image.width = chunkWidth;
+            current.image.height = chunkHeight;
+            current.image.stride = image->stride;
+
+            current.offsetX = xStart * scaleX + offsetX;
+            current.offsetY = yStart * scaleY + offsetY;
+            current.scaleX = scaleX;
+            current.scaleY = scaleY;
+
+            chunks.push(current);
         }
-
-        const uint32_t imgX = 0;
-
-        ImageChunk current;
-        current.id = i;
-
-        current.image.data = image->data + imgY * image->stride;
-        current.image.width = image->width;
-        current.image.height = currentHeight;
-        current.image.stride = image->stride;
-
-        current.offsetX = imgX * scaleX + offsetX;
-        current.offsetY = imgY * scaleY + offsetY;
-        current.scaleX = scaleX;
-        current.scaleY = scaleY;
-
-        chunks.push(current);
-        imgY += currentHeight;
     }
 
-    // sanity check
-    if (imgY != image->height)
+    if (this->v >= Verbosity::Preparation)
     {
-        throw std::runtime_error("Sanity check FAILED: summed image height is not equal to real height!\n");
+        std::cout << "Created " << chunkId << " chunks\n";
     }
 }
 
@@ -180,12 +168,12 @@ ImageGenerator::ImageGenerator(Image * outputImage,
                                const double offsetX, const double offsetY,
                                const double scaleX, const double scaleY,
                                const uint32_t maxIters,
-                               const uint32_t threadCount, const uint32_t granularity,
+                               const uint32_t threadCount,
+                               const uint32_t width, const uint32_t height,
                                const Verbosity v) : threadCount(threadCount), maxIters(maxIters), v(v)
 {
     origImage = outputImage; // for debug
-    const uint32_t chunkCount = threadCount * granularity;
-    chunkify(outputImage, offsetX, offsetY, scaleX, scaleY, chunkCount);
+    chunkify(outputImage, offsetX, offsetY, scaleX, scaleY, width, height);
 }
 
 ImageGenerator::~ImageGenerator()
