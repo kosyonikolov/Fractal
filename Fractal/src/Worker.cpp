@@ -7,11 +7,10 @@
 
 void Worker::run()
 {
-    if (this->v >= Verbosity::Full)
+    if (this->config.verbosity >= Verbosity::Full)
     {
         std::cout << "W" << this->id << ": Start\n";
     }
-    //std::cout << "Start " << uint64_t(this) << "\n";
     auto start = std::chrono::steady_clock::now();
 
     Stats stats;
@@ -45,14 +44,21 @@ void Worker::run()
         ImageChunk current = chunks.front();
         chunks.pop();
 
-        if (this->v >= Verbosity::Full)
+        if (this->config.verbosity >= Verbosity::Full)
         {
             std::cout << "W" << this->id << ": Starting work on chunk " << current.id << "\n";
         }
 
+        auto chunkStart = std::chrono::steady_clock::now();
+
         generateImage(&current.image,
                       current.offsetX, current.offsetY, current.scaleX, current.scaleY,
-                      this->maxPixelIterations);
+                      this->config.maxIterations);
+
+        auto chunkEnd = std::chrono::steady_clock::now();
+        ProcessedChunk processed;
+        processed.chunk = current;
+        processed.time = std::chrono::duration_cast<std::chrono::milliseconds>(chunkEnd - chunkStart).count();
 
         stats.chunkCount++;
     }
@@ -62,7 +68,7 @@ void Worker::run()
 
     this->exitStats = stats;
 
-    if (this->v >= Verbosity::Full)
+    if (this->config.verbosity >= Verbosity::Full)
     {
         std::cout << "W" << this->id << ": Stop\n";
     }

@@ -44,13 +44,7 @@ int main(int argc, char ** argv)
 
 	auto start = std::chrono::steady_clock::now();
 
-	ImageGenerator generator(&outputImage,
-							 config.compOffX, config.compOffY, 
-							 X_SCALE, Y_SCALE, 
-							 MAX_ITERS,
-							 config.threadCount,
-							 config.chunkWidth, config.chunkHeight,
-							 config.verbosity);
+	ImageGenerator generator(&outputImage, config);
 
 	generator.run();
 

@@ -31,9 +31,9 @@ static inline uint32_t getExitIters(const double x, const double y, const uint32
 		}
 	}
 
-	// calculate atan just once - it's slow
-	*outTheta = std::atan2(lastZ.real(), lastZ.imag());;
-	*outSum = sum + std::log(double(i));
+	// calculate angle just once
+	*outTheta = std::arg(lastZ);
+	*outSum = sum;
 	return i;
 }
 
@@ -53,6 +53,7 @@ void generateImage(Image * image,
 			double sum = 0;
 			double theta = 0;
 			getExitIters(compX, compY, maxIters, &sum, &theta);
+			theta += 3.14 / 2.0;
 
 			// create color in YUV domain
 			const double y = 180.0 * 0.5 * (std::cos(0.8 * sum) + 1);

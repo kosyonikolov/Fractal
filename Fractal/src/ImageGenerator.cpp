@@ -3,20 +3,24 @@
 
 #include <cmath>
 
-
-
-void ImageGenerator::chunkify(const Image * image,
-                              const double offsetX, const double offsetY,
-                              const double scaleX, const double scaleY,
-                              const uint32_t width, const uint32_t height)
+void ImageGenerator::chunkify(const Image * image)
 {
     uint32_t chunkId = 0;
-    for (uint32_t yStart = 0; yStart < image->height; yStart += height)
+
+    const uint32_t CHUNK_HEIGHT = this->config.chunkHeight;
+    const uint32_t CHUNK_WIDTH = this->config.chunkWidth;
+
+    const double OFFSET_X = this->config.compOffX;
+    const double OFFSET_Y = this->config.compOffY;
+    const double SCALE_X = this->config.compWidth / image->width;
+    const double SCALE_Y = this->config.compHeight / image->height;
+
+    for (uint32_t yStart = 0; yStart < image->height; yStart += CHUNK_HEIGHT)
     {
-        const uint32_t chunkHeight = std::min(height, image->height - yStart);
-        for (uint32_t xStart = 0; xStart < image->width; xStart += width)
+        const uint32_t chunkHeight = std::min(CHUNK_HEIGHT, image->height - yStart);
+        for (uint32_t xStart = 0; xStart < image->width; xStart += CHUNK_WIDTH)
         {
-            const uint32_t chunkWidth = std::min(width, image->width - xStart);    
+            const uint32_t chunkWidth = std::min(CHUNK_WIDTH, image->width - xStart);    
 
             ImageChunk current;
             current.id = chunkId++;
@@ -26,16 +30,16 @@ void ImageGenerator::chunkify(const Image * image,
             current.image.height = chunkHeight;
             current.image.stride = image->stride;
 
-            current.offsetX = xStart * scaleX + offsetX;
-            current.offsetY = yStart * scaleY + offsetY;
-            current.scaleX = scaleX;
-            current.scaleY = scaleY;
+            current.offsetX = xStart * SCALE_X + OFFSET_X;
+            current.offsetY = yStart * SCALE_Y + OFFSET_Y;
+            current.scaleX = SCALE_X;
+            current.scaleY = SCALE_Y;
 
             chunks.push(current);
         }
     }
 
-    if (this->v >= Verbosity::Preparation)
+    if (this->config.verbosity >= Verbosity::Preparation)
     {
         std::cout << "Created " << chunkId << " chunks\n";
     }
@@ -80,7 +84,7 @@ void ImageGenerator::reportStats()
 
     for (const Worker * w : this->workers)
     {
-        const Worker::Stats stats = w->getExitStats();
+        const Worker::Stats stats = w->exitStats;
         std::cout << w->id << "\t" << stats.time << "\t" << stats.chunkCount << "\t" << stats.waitTime << "\n";
 
         waitTimeSum += stats.waitTime;
@@ -105,16 +109,10 @@ void ImageGenerator::reportStats()
     std::cout << "Total calls to alloc function: " << this->allocCallCount << "\n";
 }
 
-ImageGenerator::ImageGenerator(Image * outputImage,
-                               const double offsetX, const double offsetY,
-                               const double scaleX, const double scaleY,
-                               const uint32_t maxIters,
-                               const uint32_t threadCount,
-                               const uint32_t width, const uint32_t height,
-                               const Verbosity v) : threadCount(threadCount), maxIters(maxIters), v(v)
+ImageGenerator::ImageGenerator(Image * outputImage, const Config & config) : config(config)
 {
     origImage = outputImage; // for debug
-    chunkify(outputImage, offsetX, offsetY, scaleX, scaleY, width, height);
+    chunkify(outputImage);
 }
 
 ImageGenerator::~ImageGenerator()
@@ -133,10 +131,12 @@ void ImageGenerator::run()
         return allocateWork(worker);
     };
 
+    const uint32_t THREAD_COUNT = this->config.threadCount;
+
     // create workers and give each one initial chunk
-    for (uint32_t i = 0; i < threadCount; i++)
+    for (uint32_t i = 0; i < THREAD_COUNT; i++)
     {
-        Worker * worker = new Worker(i, this->maxIters, allocFunction, this->v);
+        Worker * worker = new Worker(i, allocFunction, this->config);
         
         ImageChunk chunk = chunks.front();
         chunks.pop();
@@ -157,7 +157,7 @@ void ImageGenerator::run()
     };
 
     // start the workers
-    for (uint32_t i = 0; i < threadCount; i++)
+    for (uint32_t i = 0; i < THREAD_COUNT; i++)
     {
         Worker * worker = workers[i];
         
@@ -165,12 +165,12 @@ void ImageGenerator::run()
     }
 
     // wait
-    for (uint32_t i = 0; i < threadCount; i++)
+    for (uint32_t i = 0; i < THREAD_COUNT; i++)
     {
         workerThreads[i].join();
     }
 
-    if (this->v >= Verbosity::Stats)
+    if (this->config.verbosity >= Verbosity::Stats)
     {
         reportStats();
     }

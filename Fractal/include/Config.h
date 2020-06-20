@@ -22,6 +22,8 @@ struct Config
     uint32_t chunkWidth = 256;
 	uint32_t chunkHeight = 64;
 
+	uint32_t maxIterations = 100;
+
     Verbosity verbosity = Verbosity::Stats;
 
 	std::string outputFileName = "zad19.bmp";
