@@ -7,3 +7,5 @@ CMD="cd $DIR; ./$EXE $@"
 echo "Android cmd: $CMD"
 adb shell "$CMD"
 adb shell sync
+
+adb pull "$DIR/chunks.txt" chunks.txt

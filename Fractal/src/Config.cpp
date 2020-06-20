@@ -142,6 +142,24 @@ bool parseConfig(char** args, const uint32_t count, Config * outConfig)
 		}
 	}
 
+	// parse granularity
+	{
+		const std::string granularityString = findValue("g", "granularity");
+		if (granularityString != "")
+		{
+			try
+			{
+				outConfig->granularity = std::stoi(granularityString);
+			}
+			catch(const std::exception& e)
+			{
+				std::cerr << __FUNCTION__ << ": Couldn't parse granularity from " << granularityString << "\n";
+				return false;
+			}
+			
+		}
+	}
+
 	// parse output file name
 	{
 		const std::string fileStr = findValue("o", "output");

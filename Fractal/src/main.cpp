@@ -24,6 +24,18 @@ int main(int argc, char ** argv)
 	const int IMAGE_WIDTH = config.width;
 	const int IMAGE_HEIGHT = config.height;
 
+	if (config.granularity > 0)
+	{
+		// override chunk size
+		const uint32_t MIN_CHUNK_X = 256;
+		const uint32_t xChunks = std::min((IMAGE_WIDTH / MIN_CHUNK_X) - (IMAGE_WIDTH % MIN_CHUNK_X > 0 ? 1 : 0), config.granularity);
+		const uint32_t yChunks = config.granularity * config.threadCount / xChunks;
+
+		std::cout << "Splitting into " << xChunks << "x" << yChunks << " chunks\n";
+		config.chunkWidth = IMAGE_WIDTH / xChunks;
+		config.chunkHeight = IMAGE_HEIGHT / yChunks;
+	}
+
 	// scales
 	const double X_SCALE = config.compWidth / IMAGE_WIDTH;
 	const double Y_SCALE = config.compHeight / IMAGE_HEIGHT;

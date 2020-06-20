@@ -21,6 +21,7 @@ struct Config
 	uint32_t threadCount = 1;
     uint32_t chunkWidth = 256;
 	uint32_t chunkHeight = 64;
+	uint32_t granularity = 0; // if > 0, overrides chunk width and height
 
 	uint32_t maxIterations = 100;
 

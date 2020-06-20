@@ -185,6 +185,9 @@ void ImageGenerator::run()
             return;
         }
 
+        // image info
+        outFile << this->image->width << "\t" << this->image->height << "\n";
+
         for (Worker * worker : workers)
         {
             for (const Worker::ProcessedChunk & chunk : worker->processedChunks)
@@ -196,7 +199,7 @@ void ImageGenerator::run()
 
                 outFile << chunk.id << "\t" << worker->id << "\t" 
                         << "\t" << CHUNK_X << "\t" << CHUNK_Y << "\t" << chunk.image.width << "\t" << chunk.image.height
-                        << chunk.time << "\n";
+                        << "\t" << chunk.time << "\n";
             }
         }
     }
