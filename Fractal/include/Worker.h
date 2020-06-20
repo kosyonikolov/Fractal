@@ -26,9 +26,8 @@ public:
         uint32_t chunkCount; // number of chunks processed by the worker
     };
 
-    struct ProcessedChunk
+    struct ProcessedChunk : ImageChunk
     {
-        ImageChunk chunk;
         uint64_t time; // millseconds
     };
 

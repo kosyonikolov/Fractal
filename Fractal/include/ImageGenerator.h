@@ -24,11 +24,12 @@ private:
     std::vector<Worker*> workers;
 
     const Config & config;
+    Image * const image;
 
     uint32_t allocCallCount = 0;
 
     // split the input image into chunks and push them to the queue
-    void chunkify(const Image * image);
+    void chunkify();
 
     bool allocateWork(Worker * worker);
 

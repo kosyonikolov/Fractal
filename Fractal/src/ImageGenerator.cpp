@@ -2,8 +2,9 @@
 #include "generateImage.h"
 
 #include <cmath>
+#include <fstream>
 
-void ImageGenerator::chunkify(const Image * image)
+void ImageGenerator::chunkify()
 {
     uint32_t chunkId = 0;
 
@@ -25,7 +26,7 @@ void ImageGenerator::chunkify(const Image * image)
             ImageChunk current;
             current.id = chunkId++;
 
-            current.image.data = image->data + yStart * image->stride + xStart * 3;
+            current.image.data = this->image->data + yStart * image->stride + xStart * 3;
             current.image.width = chunkWidth;
             current.image.height = chunkHeight;
             current.image.stride = image->stride;
@@ -109,10 +110,10 @@ void ImageGenerator::reportStats()
     std::cout << "Total calls to alloc function: " << this->allocCallCount << "\n";
 }
 
-ImageGenerator::ImageGenerator(Image * outputImage, const Config & config) : config(config)
+ImageGenerator::ImageGenerator(Image * outputImage, const Config & config) : config(config), image(outputImage)
 {
     origImage = outputImage; // for debug
-    chunkify(outputImage);
+    chunkify();
 }
 
 ImageGenerator::~ImageGenerator()
@@ -173,5 +174,30 @@ void ImageGenerator::run()
     if (this->config.verbosity >= Verbosity::Stats)
     {
         reportStats();
+    }
+
+    if (this->config.chunksFile != "")
+    {
+        std::ofstream outFile(this->config.chunksFile);
+        if (!outFile.is_open())
+        {
+            std::cerr << "Couldn't open output chunks file " << this->config.chunksFile << "\n";
+            return;
+        }
+
+        for (Worker * worker : workers)
+        {
+            for (const Worker::ProcessedChunk & chunk : worker->processedChunks)
+            {
+                // calculate chunk x and y
+                uint32_t OFFSET = chunk.image.data - this->image->data;
+                const uint32_t CHUNK_Y = OFFSET / this->image->stride;
+                const uint32_t CHUNK_X = (OFFSET % this->image->stride) / 3;
+
+                outFile << chunk.id << "\t" << worker->id << "\t" 
+                        << "\t" << CHUNK_X << "\t" << CHUNK_Y << "\t" << chunk.image.width << "\t" << chunk.image.height
+                        << chunk.time << "\n";
+            }
+        }
     }
 }

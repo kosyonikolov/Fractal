@@ -57,8 +57,11 @@ void Worker::run()
 
         auto chunkEnd = std::chrono::steady_clock::now();
         ProcessedChunk processed;
-        processed.chunk = current;
+        ImageChunk & p = processed;
+        p = current;
         processed.time = std::chrono::duration_cast<std::chrono::milliseconds>(chunkEnd - chunkStart).count();
+
+        this->processedChunks.push_back(processed);
 
         stats.chunkCount++;
     }

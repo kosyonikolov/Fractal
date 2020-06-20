@@ -27,6 +27,8 @@ struct Config
     Verbosity verbosity = Verbosity::Stats;
 
 	std::string outputFileName = "zad19.bmp";
+
+	std::string chunksFile = "chunks.txt";
 };
 
 bool parseConfig(char** args, const uint32_t count, Config * outConfig);
