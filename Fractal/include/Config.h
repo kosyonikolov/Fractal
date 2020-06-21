@@ -29,6 +29,8 @@ struct Config
 	uint32_t chunkHeight = 64;
 	uint32_t granularity = 0; // if > 0, overrides chunk width and height
 
+	uint32_t minChunkWidth = 256;
+
 	uint32_t maxIterations = 100;
 
     Verbosity verbosity = Verbosity::Stats;

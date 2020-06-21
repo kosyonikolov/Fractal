@@ -209,5 +209,23 @@ bool parseConfig(char** args, const uint32_t count, Config * outConfig)
 		}
 	}
 
+	// parse min chunk width
+	{
+		const std::string minStr = findValue("m", "minChunkWidth");
+		if (minStr != "")
+		{
+			try
+			{
+				outConfig->minChunkWidth = std::stoi(minStr);
+			}
+			catch(const std::exception& e)
+			{
+				std::cerr << __FUNCTION__ << ": Couldn't parse min chunk width from " << minStr << "\n";
+				return false;
+			}
+			
+		}
+	}
+
 	return true;
 }

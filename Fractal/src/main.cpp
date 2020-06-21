@@ -27,7 +27,7 @@ int main(int argc, char ** argv)
 	if (config.granularity > 0)
 	{
 		// override chunk size
-		const uint32_t MIN_CHUNK_X = 256;
+		const uint32_t MIN_CHUNK_X = config.minChunkWidth;
 		const uint32_t xChunks = std::min((IMAGE_WIDTH / MIN_CHUNK_X) - (IMAGE_WIDTH % MIN_CHUNK_X > 0 ? 1 : 0), config.granularity);
 		const uint32_t yChunks = config.granularity * config.threadCount / xChunks;
 
