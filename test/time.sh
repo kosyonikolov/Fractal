@@ -24,13 +24,13 @@ fi
 SIZE="$2"
 C_SIZE="$3"
 CHUNK_SIZE="$4"
-ATTEMPTS=7
+ATTEMPTS=3
 
 NOW=$(date +%H%M%S)
 RUN_ID="${TYPE}_${CHUNK_SIZE}_${NOW}"
 
 # write header
-OUT_FILE="stat_${RUN_ID}.csv"
+OUT_FILE="stats/stat_${RUN_ID}.csv"
 echo "threads,chunksize,time" > "$OUT_FILE"
 
 LOG_FILE="${RUN_ID}.log"
@@ -51,8 +51,8 @@ do
     while [[ $ITER -lt $ATTEMPTS ]]
     do
         echo "Attempt $ITER / $ATTEMPTS"
-        echo $CMD -s $SIZE -r $C_SIZE -t $T_COUNT -c $G -v 1
-        echo $CMD -s $SIZE -r $C_SIZE -t $T_COUNT -c $G -v 1 >> "$LOG_FILE"
+        echo $CMD -s $SIZE -r $C_SIZE -t $T_COUNT -g $G -v 1
+        echo $CMD -s $SIZE -r $C_SIZE -t $T_COUNT -g $G -v 1 >> "$LOG_FILE"
         OUTPUT=$($CMD -s $SIZE -r $C_SIZE -t $T_COUNT -g $G -v 1)
         echo "$OUTPUT" >> "$LOG_FILE"
 

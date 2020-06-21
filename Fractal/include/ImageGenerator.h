@@ -42,7 +42,7 @@ public:
 
     Image * origImage;
 
-    void run();
+    uint64_t run();
 };
 
 #endif

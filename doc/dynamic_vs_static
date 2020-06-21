@@ -1,0 +1,76 @@
+Android
+2048x2048
+
+---==== Single thread ====---
+kosyo@kosyo-Lenovo-IdeaPad-Y510P:~/Documents/Fractal/test$ ./run_device.sh -s 2048x2048 -v 1 -t 1 -g 1
+Android cmd: cd /data/local/tmp; ./RsaFractal -s 2048x2048 -v 1 -t 1 -g 1
+Splitting into 1x1 chunks
+Worker  Time    Chunks  Wait time
+0       119196  1       2
+Time std: 0 ms / 0 %
+Peak to peak: 0 ms / 0 %
+Total wait time: 0 ms
+Total calls to alloc function: 1
+Generating took 119197 ms
+/data/local/tmp/chunks.txt: 1 file pulled, 0 skipped. 0.0 MB/s (36 bytes in 0.003s)
+kosyo@kosyo-Lenovo-IdeaPad-Y510P:~/Documents/Fractal/test$ ./run_device.sh -s 2048x2048 -v 1 -t 1 -g 1
+Android cmd: cd /data/local/tmp; ./RsaFractal -s 2048x2048 -v 1 -t 1 -g 1
+Splitting into 1x1 chunks
+Worker  Time    Chunks  Wait time
+0       119151  1       2
+Time std: 0 ms / 0 %
+Peak to peak: 0 ms / 0 %
+Total wait time: 0 ms
+Total calls to alloc function: 1
+Generating took 119152 ms
+/data/local/tmp/chunks.txt: 1 file pulled, 0 skipped. 0.0 MB/s (36 bytes in 0.003s)
+kosyo@kosyo-Lenovo-IdeaPad-Y510P:~/Documents/Fractal/test$ ./run_device.sh -s 2048x2048 -v 1 -t 1 -g 1
+Android cmd: cd /data/local/tmp; ./RsaFractal -s 2048x2048 -v 1 -t 1 -g 1
+Splitting into 1x1 chunks
+Worker  Time    Chunks  Wait time
+0       119114  1       3
+Time std: 0 ms / 0 %
+Peak to peak: 0 ms / 0 %
+Total wait time: 0 ms
+Total calls to alloc function: 1
+Generating took 119114 ms
+/data/local/tmp/chunks.txt: 1 file pulled, 0 skipped. 0.0 MB/s (36 bytes in 0.004s)
+
+---==== 8 threads, dynamic alloc ====---
+kosyo@kosyo-Lenovo-IdeaPad-Y510P:~/Documents/Fractal/test$ ./run_device.sh -s 2048x2048 -v 1 -t 8 -g 32
+Android cmd: cd /data/local/tmp; ./RsaFractal -s 2048x2048 -v 1 -t 8 -g 32
+Splitting into 8x32 chunks
+Worker  Time    Chunks  Wait time
+0       15035   32      160
+1       15064   32      33
+2       14992   31      36
+3       15023   31      32
+4       15032   32      34
+5       15039   32      26
+6       15000   33      25
+7       14938   33      27
+Time std: 36.0761 ms / 0.239485 %
+Peak to peak: 126 ms / 0.836431 %
+Total wait time: 0 ms
+Total calls to alloc function: 256
+Generating took 15065 ms
+
+---==== 8 threads, static alloc ====---
+kosyo@kosyo-Lenovo-IdeaPad-Y510P:~/Documents/Fractal/test$ ./run_device.sh -s 2048x2048 -v 1 -t 8 -g 32
+Android cmd: cd /data/local/tmp; ./RsaFractal -s 2048x2048 -v 1 -t 8 -g 32
+Splitting into 1x256 chunks
+Worker  Time    Chunks  Wait time
+0       14977   32      0
+1       14970   32      2
+2       15276   32      2
+3       15075   32      1
+4       15182   32      1
+5       15019   32      1
+6       15320   32      2
+7       15000   32      2
+Time std: 130.034 ms / 0.848783 %
+Peak to peak: 350 ms / 2.2846 %
+Total wait time: 0 ms
+Total calls to alloc function: 8
+Generating took 15392 ms
+/data/local/tmp/chunks.txt: 1 file pulled, 0 skipped. 1.5 MB/s (6160 bytes in 0.004s)

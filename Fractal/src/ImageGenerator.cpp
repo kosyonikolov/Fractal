@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <fstream>
+#include <chrono>
 
 void ImageGenerator::chunkify()
 {
@@ -113,7 +114,6 @@ void ImageGenerator::reportStats()
 ImageGenerator::ImageGenerator(Image * outputImage, const Config & config) : config(config), image(outputImage)
 {
     origImage = outputImage; // for debug
-    chunkify();
 }
 
 ImageGenerator::~ImageGenerator()
@@ -124,8 +124,10 @@ ImageGenerator::~ImageGenerator()
     }
 }
 
-void ImageGenerator::run()
+uint64_t ImageGenerator::run()
 {
+    auto startTime = std::chrono::steady_clock::now();
+    chunkify();
     // encapsulate the allocator function
     auto allocFunction = [&](Worker * worker) -> bool
     {
@@ -139,14 +141,32 @@ void ImageGenerator::run()
     {
         Worker * worker = new Worker(i, allocFunction, this->config);
         
-        ImageChunk chunk = chunks.front();
-        chunks.pop();
+        if (this->config.workAlloc == WorkAllocationType::Dynamic)
+        {
+            ImageChunk chunk = chunks.front();
+            chunks.pop();
+            worker->addChunk(chunk);
+        }        
 
-        worker->addChunk(chunk);
         workers.push_back(worker);
+    }
 
-        uint32_t yCoord = (chunk.image.data - origImage->data) / (3 * origImage->width);
-        //std::cout << "Alloc " << yCoord << " to " << uint64_t(worker) << "\n";
+    if (this->config.workAlloc == WorkAllocationType::StaticOrdered)
+    {
+        uint32_t workerIdx = 0;
+        uint32_t count = 0;
+        while (!chunks.empty())
+        {
+            ImageChunk chunk = chunks.front();
+            chunks.pop();
+            workers[workerIdx]->addChunk(chunk);
+
+            workerIdx++;
+            count++;
+            if (count % workers.size() == 0) workerIdx++;
+
+            workerIdx %= workers.size();
+        }
     }
 
     // create array of threads so we can wait on them
@@ -171,6 +191,9 @@ void ImageGenerator::run()
         workerThreads[i].join();
     }
 
+    // do not include stat reporting in output
+    auto endTime = std::chrono::steady_clock::now();
+
     if (this->config.verbosity >= Verbosity::Stats)
     {
         reportStats();
@@ -182,7 +205,7 @@ void ImageGenerator::run()
         if (!outFile.is_open())
         {
             std::cerr << "Couldn't open output chunks file " << this->config.chunksFile << "\n";
-            return;
+            return 0;
         }
 
         // image info
@@ -203,4 +226,6 @@ void ImageGenerator::run()
             }
         }
     }
+
+    return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
 }

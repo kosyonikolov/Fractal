@@ -6,6 +6,12 @@
 
 #include "Verbosity.h"
 
+enum class WorkAllocationType
+{
+	Dynamic,
+	StaticOrdered
+};
+
 struct Config
 {
     // size of image
@@ -26,6 +32,7 @@ struct Config
 	uint32_t maxIterations = 100;
 
     Verbosity verbosity = Verbosity::Stats;
+	WorkAllocationType workAlloc = WorkAllocationType::Dynamic;
 
 	std::string outputFileName = "zad19.bmp";
 

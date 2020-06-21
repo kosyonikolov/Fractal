@@ -51,18 +51,9 @@ int main(int argc, char ** argv)
 
 	//std::cout << "Generate image...\n";
 
-	int availableThreads = std::thread::hardware_concurrency();
-	//std::cout << "Hardware threads: " << availableThreads << std::endl;
-
-	auto start = std::chrono::steady_clock::now();
-
 	ImageGenerator generator(&outputImage, config);
 
-	generator.run();
-
-	auto end = std::chrono::steady_clock::now();
-
-	uint64_t timeMs = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	auto timeMs = generator.run();
 
 	std::cout << "Generating took " << timeMs << " ms\n";
 

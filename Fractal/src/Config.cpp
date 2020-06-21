@@ -187,5 +187,27 @@ bool parseConfig(char** args, const uint32_t count, Config * outConfig)
 		}
 	}
 
+	// parse alloc type
+	{
+		const std::string allocStr = findValue("a", "alloc");
+		if (allocStr != "")
+		{
+			if (allocStr == "d" || allocStr == "dynamic")
+			{
+				outConfig->workAlloc = WorkAllocationType::Dynamic;
+			}
+			else if (allocStr == "s" || allocStr == "static")
+			{
+				outConfig->workAlloc = WorkAllocationType::StaticOrdered;
+			}
+			else
+			{
+				std::cerr << __FUNCTION__ << ": Bad allocation type " << allocStr << "\n";
+				return false;
+			}
+			
+		}
+	}
+
 	return true;
 }
