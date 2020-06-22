@@ -19,9 +19,9 @@ struct Config
 	uint32_t height = 480;
 
 	// size of rectangle in complex plane corresponding to image
-	double compWidth = 2.0;
+	double compWidth = 4.0;
 	double compHeight = 2.0;
-	double compOffX = -1.0;
+	double compOffX = -2.0;
 	double compOffY = -1.0;
 
 	uint32_t threadCount = 1;
